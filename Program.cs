@@ -9,7 +9,8 @@ namespace Examen
             Console.WriteLine("Критический путь.");
             Console.WriteLine("Введите путь файла:");
             string path = Console.ReadLine();
-
+            CriticalPath cr = new CriticalPath(path);
+            Console.ReadKey();
         }
     }
 }

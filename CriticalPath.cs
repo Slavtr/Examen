@@ -35,12 +35,22 @@ namespace Examen
             }
             //Поиск пути с максимальной длиной.
             int max = fnlcn[0][0].length, maxind = 0;
+            List<int> maxindl = new List<int>();
             for (int i = 0; i < ret.Count; i++)
             {
-                if (FnlMv(fnlcn[i]) >= max)
+                if (FnlMv(fnlcn[i]) > max)
                 {
                     max = FnlMv(fnlcn[i]);
                     maxind = i;
+                }
+            }
+            //Поиск одинаковых критических путей.
+            maxindl.Add(maxind);
+            for (int i = 0; i < ret.Count; i++)
+            {
+                if (FnlMv(fnlcn[i]) == max && i!=maxind)
+                {
+                    maxindl.Add(i);
                 }
             }
             //Диалог с пользователем.
@@ -49,13 +59,16 @@ namespace Examen
             if (itog == "Y")
             {
                 //Запись критического пути в файл.
-                using (StreamWriter sr = new StreamWriter("Итог.txt"))
+                using (StreamWriter sr = new StreamWriter("Итог.csv"))
                 {
-                    foreach (Rbt rb in fnlcn[maxind])
+                    foreach (int mx in maxindl)
                     {
-                        sr.WriteLine(rb.point1 + " - " + rb.point2);
+                        foreach (Rbt rb in fnlcn[mx])
+                        {
+                            sr.WriteLine(rb.point1 + " - " + rb.point2);
+                        }
+                        sr.WriteLine(max);
                     }
-                    sr.WriteLine(max);
                 }
             }
             else
