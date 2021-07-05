@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 
@@ -18,62 +19,73 @@ namespace Examen
         /// <param name="path">Путь к файлу</param>
         public CriticalPath(string path)
         {
-            List<Rbt> ret;
-            List<Rbt> ls = Flrd(path);
-            //Список из рёбер, выходящих из начальной точки графа.
-            ret = ls.FindAll(x => x.point1 == ls[Minel(ls)].point1);
-            //Список путей.
-            List<List<Rbt>> fnlcn = new List<List<Rbt>>();
-            foreach (Rbt rb in ret)
+            try
             {
-                //Запускается рекурсия для поиска путей из начальной точки, указанной ранее. Цикл нужен, чтобы проверить все начальные точки.
-                Mv(ls, rb);
-                //В список путей добавляется длиннейший путь из полученных.
-                fnlcn.Add(RtPrs(ls, s));
-                //Строка обновляется для записи новых путей.
-                s = "";
-            }
-            //Поиск пути с максимальной длиной.
-            int max = fnlcn[0][0].length, maxind = 0;
-            List<int> maxindl = new List<int>();
-            for (int i = 0; i < ret.Count; i++)
-            {
-                if (FnlMv(fnlcn[i]) > max)
+                Trace.WriteLine("Запущен класс критического пути.");
+                List<Rbt> ret;
+                List<Rbt> ls = Flrd(path);
+                //Список из рёбер, выходящих из начальной точки графа.
+                ret = ls.FindAll(x => x.point1 == ls[Minel(ls)].point1);
+                //Список путей.
+                List<List<Rbt>> fnlcn = new List<List<Rbt>>();
+                Trace.WriteLine("Запущен поиск критических путей");
+                foreach (Rbt rb in ret)
                 {
-                    max = FnlMv(fnlcn[i]);
-                    maxind = i;
+                    //Запускается рекурсия для поиска путей из начальной точки, указанной ранее. Цикл нужен, чтобы проверить все начальные точки.
+                    Mv(ls, rb);
+                    //В список путей добавляется длиннейший путь из полученных.
+                    fnlcn.Add(RtPrs(ls, s));
+                    //Строка обновляется для записи новых путей.
+                    s = "";
                 }
-            }
-            //Поиск одинаковых критических путей.
-            maxindl.Add(maxind);
-            for (int i = 0; i < ret.Count; i++)
-            {
-                if (FnlMv(fnlcn[i]) == max && i!=maxind)
+                Trace.WriteLine("Запущен поиск пути с максимальной длиной");
+                //Поиск пути с максимальной длиной.
+                int max = fnlcn[0][0].length, maxind = 0;
+                List<int> maxindl = new List<int>();
+                for (int i = 0; i < ret.Count; i++)
                 {
-                    maxindl.Add(i);
-                }
-            }
-            //Диалог с пользователем.
-            Console.WriteLine("Сохранить итог?(Y/N)");
-            string itog = Console.ReadLine();
-            if (itog == "Y")
-            {
-                //Запись критического пути в файл.
-                using (StreamWriter sr = new StreamWriter("Итог.csv"))
-                {
-                    foreach (int mx in maxindl)
+                    if (FnlMv(fnlcn[i]) > max)
                     {
-                        foreach (Rbt rb in fnlcn[mx])
-                        {
-                            sr.WriteLine(rb.point1 + " - " + rb.point2);
-                        }
-                        sr.WriteLine(max);
+                        max = FnlMv(fnlcn[i]);
+                        maxind = i;
                     }
                 }
+                //Поиск одинаковых критических путей.
+                maxindl.Add(maxind);
+                for (int i = 0; i < ret.Count; i++)
+                {
+                    if (FnlMv(fnlcn[i]) == max && i != maxind)
+                    {
+                        maxindl.Add(i);
+                    }
+                }
+                Trace.WriteLine("Запущен процесс вывода результатов поиска.");
+                //Диалог с пользователем.
+                Console.WriteLine("Сохранить итог?(Y/N)");
+                string itog = Console.ReadLine();
+                if (itog == "Y")
+                {
+                    //Запись критического пути в файл.
+                    using (StreamWriter sr = new StreamWriter("Итог.csv"))
+                    {
+                        foreach (int mx in maxindl)
+                        {
+                            foreach (Rbt rb in fnlcn[mx])
+                            {
+                                sr.WriteLine(rb.point1 + " - " + rb.point2);
+                            }
+                            sr.WriteLine(max);
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Итог не был сохранён.");
+                }
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("Итог не был сохранён.");
+                Trace.WriteLine("Выполнение прервано с ошибкой " + e.Message);
             }
         }
         /// <summary>
