@@ -5,21 +5,35 @@ using System.Text;
 
 namespace Examen
 {
+    /// <summary>
+    /// Класс для поиска критического пути с применением рекурсивного алгоритма.
+    /// </summary>
     public class CriticalPath
     {
+        //Строка, в которую пути записываются из рекурсии. Нужна из-за особенностей ветвления в рекурсиях.
         string s = "";
+        /// <summary>
+        /// Конструктор, принимающий путь к файлу и активирующий методы поиска критического пути
+        /// </summary>
+        /// <param name="path">Путь к файлу</param>
         public CriticalPath(string path)
         {
             List<Rbt> ret;
             List<Rbt> ls = Flrd(path);
+            //Список из рёбер, выходящих из начальной точки графа.
             ret = ls.FindAll(x => x.point1 == ls[Minel(ls)].point1);
+            //Список путей.
             List<List<Rbt>> fnlcn = new List<List<Rbt>>();
             foreach (Rbt rb in ret)
             {
+                //Запускается рекурсия для поиска путей из начальной точки, указанной ранее. Цикл нужен, чтобы проверить все начальные точки.
                 Mv(ls, rb);
+                //В список путей добавляется длиннейший путь из полученных.
                 fnlcn.Add(RtPrs(ls, s));
+                //Строка обновляется для записи новых путей.
                 s = "";
             }
+            //Поиск пути с максимальной длиной.
             int max = fnlcn[0][0].length, maxind = 0;
             for (int i = 0; i < ret.Count; i++)
             {
@@ -29,15 +43,29 @@ namespace Examen
                     maxind = i;
                 }
             }
-            using (StreamWriter sr = new StreamWriter("Итог.txt"))
+            //Диалог с пользователем.
+            Console.WriteLine("Сохранить итог?(Y/N)");
+            string itog = Console.ReadLine();
+            if (itog == "Y")
             {
-                foreach (Rbt rb in fnlcn[maxind])
+                //Запись критического пути в файл.
+                using (StreamWriter sr = new StreamWriter("Итог.txt"))
                 {
-                    sr.WriteLine(rb.point1 + " - " + rb.point2);
+                    foreach (Rbt rb in fnlcn[maxind])
+                    {
+                        sr.WriteLine(rb.point1 + " - " + rb.point2);
+                    }
+                    sr.WriteLine(max);
                 }
-                sr.WriteLine(max);
+            }
+            else
+            {
+                Console.WriteLine("Итог не был сохранён.");
             }
         }
+        /// <summary>
+        /// Структура, хранящая рёбра графа
+        /// </summary>
         struct Rbt
         {
             public int point1;
@@ -53,6 +81,11 @@ namespace Examen
                 return point1.ToString() + " - " + point2.ToString() + " " + length.ToString();
             }
         }
+        /// <summary>
+        /// Метод поиска минимального элемента
+        /// </summary>
+        /// <param name="ls">Список структур, в котором производится поиск</param>
+        /// <returns>Индекс минимального элемента в списке</returns>
         int Minel(List<Rbt> ls)
         {
             int min = ls[0].point1, minind = 0;
@@ -66,6 +99,11 @@ namespace Examen
             }
             return minind;
         }
+        /// <summary>
+        /// Метод поиска максимального элемента списка
+        /// </summary>
+        /// <param name="ls">Список структур, где производится поиск</param>
+        /// <returns>Индекс максимального элемента</returns>
         int Maxel(List<Rbt> ls)
         {
             int min = ls[0].point2, maxind = 0;
@@ -79,6 +117,12 @@ namespace Examen
             }
             return maxind;
         }
+        /// <summary>
+        /// Рекурсивный метод, проходящий все пути в графе и записывающий их в строку
+        /// </summary>
+        /// <param name="ls">Список структур, представляющий рёбра графа</param>
+        /// <param name="minel">Элемент, с которого начинается поиск путей</param>
+        /// <returns>Возвращает длину пройденного пути</returns>
         int Mv(List<Rbt> ls, Rbt minel)
         {
             int ret = 0;
@@ -102,6 +146,11 @@ namespace Examen
             }
             return ret;
         }
+        /// <summary>
+        /// Метод чтения файла и заполнения списка структур для последующего использования
+        /// </summary>
+        /// <param name="path">Путь к файлу</param>
+        /// <returns>Список структур, представляющий рёбра графа</returns>
         List<Rbt> Flrd(string path)
         {
             List<Rbt> ret = new List<Rbt>();
@@ -116,6 +165,12 @@ namespace Examen
             }
             return ret;
         }
+        /// <summary>
+        /// Метод, разбивающий строку со всеми путями в графе на отдельные пути и возвращающий длиннейший из них.
+        /// </summary>
+        /// <param name="ls">Список рёбер графа</param>
+        /// <param name="s">Строка со всеми рекурсивно найденными путями в графе</param>
+        /// <returns></returns>
         List<Rbt> RtPrs(List<Rbt> ls, string s)
         {
             List<List<Rbt>> ret = new List<List<Rbt>>();
@@ -157,6 +212,11 @@ namespace Examen
             }
             return ret[maxind];
         }
+        /// <summary>
+        /// Метод, ищущий длину пути.
+        /// </summary>
+        /// <param name="ls">Список рёбер, представляющий путь.</param>
+        /// <returns>Длина пути по списку.</returns>
         int FnlMv(List<Rbt> ls)
         {
             int ret = 0;
